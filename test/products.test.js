@@ -262,7 +262,7 @@ describe("Products", () => {
     });
   });
 
-  describe.only("3 - Crie um endpoint para atualizar um produto", () => {
+  describe("3 - Crie um endpoint para atualizar um produto", () => {
     it("Será validado que não é possível atualizar um produto com o nome menor que 5 caracteres", async () => {
       let result;
       let resultProductId;
@@ -417,7 +417,7 @@ describe("Products", () => {
     });
   });
 
-  describe("4 - Crie um endpoint para deletar um produto", () => {
+  describe.only("4 - Crie um endpoint para deletar um produto", () => {
     it("Será validado que é possível deletar um produto com sucesso", async () => {
       let result;
       let resultProductId;
