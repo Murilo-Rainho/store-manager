@@ -8,7 +8,6 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       date: {
-        allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.fn('now'),
       },

@@ -417,7 +417,7 @@ describe("Products", () => {
     });
   });
 
-  describe.only("4 - Crie um endpoint para deletar um produto", () => {
+  describe("4 - Crie um endpoint para deletar um produto", () => {
     it("Será validado que é possível deletar um produto com sucesso", async () => {
       let result;
       let resultProductId;
