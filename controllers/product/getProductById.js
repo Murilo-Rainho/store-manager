@@ -1,10 +1,9 @@
-const { postProduct: postProductService } = require('../../services/product');
+const { getProductById: getProductByIdService } = require('../../services/product');
 
 module.exports = async (req, res, next) => {
   try {
-    const { body: nameAndQuantity } = req;
-  
-    const { code, message, httpStatusCode, result } = await postProductService(nameAndQuantity);
+    const { id: productId } = req.params;
+    const { code, message, httpStatusCode, result } = await getProductByIdService(productId);
   
     if (code) return res.status(httpStatusCode).json({ code, message });
     

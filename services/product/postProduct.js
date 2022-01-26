@@ -1,14 +1,20 @@
 const { Product } = require('../../models');
 
 module.exports = async ({ name, quantity }) => {
-  const alreadyExists = await Product.findOne({ where: { name } });
+  let CODE_MESSAGE = 'invalid_data';
 
-  if (alreadyExists) {
-    const CODE_MESSAGE = 'invalid_data';
-    return { httpStatusCode: 409, code: CODE_MESSAGE, message: 'Product already exists' };
+  try {
+    const alreadyExists = await Product.findOne({ where: { name } });
+  
+    if (alreadyExists) {
+      return { httpStatusCode: 409, code: CODE_MESSAGE, message: 'Product already exists' };
+    }
+  
+    const { dataValues: result } = await Product.create({ name, quantity });
+  
+    return { result, httpStatusCode: 201 };
+  } catch (error) {
+    CODE_MESSAGE = 'server_error';
+    return { httpStatusCode: 500, code: CODE_MESSAGE, message: 'Something is wrong in the server' };
   }
-
-  const { dataValues: result } = await Product.create({ name, quantity });
-
-  return { result, httpStatusCode: 201 };
 };
