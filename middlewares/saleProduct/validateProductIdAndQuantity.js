@@ -1,7 +1,9 @@
 const Joi = require('joi');
 
+const camelCase = require('./camelCase');
+
 const productObjSchema = Joi.object({
-  product_id: Joi.number().min(1).required().messages({
+  productId: Joi.number().min(1).required().messages({
     'string.base': '"product_id" must be a number larger than or equal to 1',
     'string.min': '"product_id" must be a number larger than or equal to 1',
     'any.required': '"product_id" is required',
@@ -18,7 +20,8 @@ module.exports = async (req, res, next) => {
   let error;
 
   req.body.forEach((obj) => {
-    const { error: joiError } = productObjSchema.validate(obj);
+    const camelCaseObj = camelCase(obj);
+    const { error: joiError } = productObjSchema.validate(camelCaseObj);
 
     if (joiError) error = joiError;
   });
