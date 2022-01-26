@@ -6,10 +6,12 @@ const {
 
 const { expect } = require('chai');
 
+const Models = require('../../models');
+
 describe('The model', () => {
 
   describe('Product', () => {
-    const { Product: ProductModel } = require('../../models');
+    const { Product: ProductModel } = Models;
     const Product = ProductModel(sequelize);
     const product = new Product();
 
@@ -32,7 +34,7 @@ describe('The model', () => {
   });
 
   describe('Sale', () => {
-    const { Sale: SaleModel } = require('../../models');
+    const { Sale: SaleModel } = Models;
     const Sale = SaleModel(sequelize);
     const sale = new Sale();
 
@@ -55,7 +57,7 @@ describe('The model', () => {
   });
 
   describe('SaleProduct', () => {
-    const { SaleProduct: SaleProductModel } = require('../../models');
+    const { SaleProduct: SaleProductModel } = Models;
     const SaleProduct = SaleProductModel(sequelize);
     const saleProduct = new SaleProduct();
 
