@@ -4,9 +4,11 @@ const { expect } = require('chai');
 describe('The router', () => {
 
   describe('"product" has the service', () => {
+
     const { Product: productModel } = require('../../models');
     
     describe('postProduct that', () => {
+
       const { postProduct } = require('../../services/product');
       const validateNameAndQuantity = require('../../middlewares/product/validateNameAndQuantity');
 
@@ -73,6 +75,7 @@ describe('The router', () => {
     });
     
     describe('getProducts that', () => {
+
       const { getProducts } = require('../../services/product');
 
       const mockArray = [
@@ -111,6 +114,7 @@ describe('The router', () => {
     });
 
     describe('getProductById that', () => {
+
       const { getProductById } = require('../../services/product');
 
       const mockObj = {
@@ -144,6 +148,7 @@ describe('The router', () => {
     });
 
     describe('deleteProductById that', () => {
+
       const { deleteProductById } = require('../../services/product');
       
       const mockObj = {
@@ -183,9 +188,11 @@ describe('The router', () => {
 
         productModel.findByPk.restore();
       });
+
     });
 
     describe('editProductById that', () => {
+
       const { editProductById } = require('../../services/product');
 
       const mockObj = {
@@ -214,8 +221,236 @@ describe('The router', () => {
 
         productModel.update.restore();
       });
+
     });
+
+  });
+
+  describe('"saleProduct" has the service', () => {
+
+    const { Sale: saleModel, SaleProduct: saleProductModel, sequelize } = require('../../models');
+
+    describe('postSaleProduct that', () => {
+
+      const { postSaleProduct } = require('../../services/saleProduct');
+      const { validateProductIdAndQuantity } = require('../../middlewares/saleProduct');
+
+      const mockArray = [
+        {
+          product_id: 1,
+          quantity: 2
+        },
+        {
+          product_id: 2,
+          quantity: 5
+        },
+      ]	;
+
+      const failMockArray = [
+        {
+          quantity: 1,
+        },
+        {
+          product_id: 2,
+          quantity: 20,
+        },
+      ];
+
+      it('return an array of objects in the key "itemsSold" when bulk insert are a success', async () => {
+        stub(sequelize, 'transaction').resolves({ commit: () => {} });
+        stub(saleModel, 'create').resolves({ id: 2 });
+        stub(saleProductModel, 'create').resolves();
+
+        const { result: { itemsSold } } = await postSaleProduct(mockArray);
+
+        expect(itemsSold).to.deep.equals(mockArray);
+
+        saleModel.create.restore();
+        saleProductModel.create.restore();
+        sequelize.transaction.restore();
+      });
+      
+      it('validate the array of salesObj, that must have, which one, the keys "product_id" and "quantity"', () => {
+        const response = {};
+        const request = {};
+        request.body = failMockArray;
+        let next = () => {};
+
+        response.status = stub().returns(response);
+        response.json = stub().returns();
+        next = stub().returns();
+
+        validateProductIdAndQuantity(request, response, next);
+
+        expect(response.status.calledWith(400)).to.be.equal(true);
+      });
+
+    });
+    
+    describe('getSalesProducts that', () => {
+      
+      const { getSalesProducts } = require('../../services/saleProduct');
+
+      const saleProductModelMockArray = [
+        {
+          dataValues: {
+            saleId: 1,
+            sale_id: 1,
+            quantity: 5,
+            product_id: 1,
+            productId: 1,
+          },
+        },
+        {
+          dataValues: {
+            saleId: 1,
+            sale_id: 1,
+            quantity: 10,
+            product_id: 2,
+            productId: 2,
+          },
+        },
+      ];
+      
+      const saleModelMockObj = {
+        dataValues: {
+          id: 1,
+          date: new Date('2022-01-27T15:56:02.000Z'),
+        },
+      };
+
+      const resultMockArray = [
+        {
+          saleId: 1,
+          quantity: 5,
+          product_id: 1,
+          date: new Date('2022-01-27T15:56:02.000Z'),
+        },
+        {
+          saleId: 1,
+          quantity: 10,
+          product_id: 2,
+          date: new Date('2022-01-27T15:56:02.000Z'),
+        },
+      ];
+
+      it('return all sales_products', async () => {
+        stub(saleProductModel, 'findAll').resolves(saleProductModelMockArray);
+        stub(saleModel, 'findByPk').resolves(saleModelMockObj);
+
+        const { result } = await getSalesProducts();
+
+        expect(result).to.deep.equals(resultMockArray);
+
+        saleProductModel.findAll.restore();
+        saleModel.findByPk.restore();
+      });
+
+    });
+    
+    describe('getSalesProductsById that', () => {
+      
+      const { getSalesProductsById } = require('../../services/saleProduct');
+
+      const saleProductModelMockArray = [
+        {
+          dataValues: {
+            saleId: 1,
+            sale_id: 1,
+            quantity: 5,
+            product_id: 1,
+            productId: 1,
+          },
+        },
+        {
+          dataValues: {
+            saleId: 1,
+            sale_id: 1,
+            quantity: 10,
+            product_id: 2,
+            productId: 2,
+          },
+        },
+      ];
+
+      const saleModelMockArray = {
+        id: 1,
+        date: new Date('2022-01-27T15:56:02.000Z'),
+      };
+
+      const resultMockArray = [
+        {
+          quantity: 5,
+          product_id: 1,
+          date: new Date('2022-01-27T15:56:02.000Z'),
+        },
+        {
+          quantity: 10,
+          product_id: 2,
+          date: new Date('2022-01-27T15:56:02.000Z'),
+        }
+      ];
+
+      before(() => {
+        stub(saleProductModel, 'findAll').resolves(saleProductModelMockArray);
+      });
+  
+      after(() => {
+        saleProductModel.findAll.restore();
+      });
+
+      it('return all sales_products with this saleId', async () => {
+        stub(saleModel, 'findByPk').resolves(saleModelMockArray);
+
+        const { result } = await getSalesProductsById(1);
+
+        expect(result).to.deep.equals(resultMockArray);
+
+        saleModel.findByPk.restore();
+      });
+
+      it('return a error message if has no one sale with this saleId', async () => {
+        stub(saleModel, 'findByPk').resolves();
+
+        const { message } = await getSalesProductsById(1);
+
+        expect(message).to.be.equals('Sale not found');
+
+        saleModel.findByPk.restore();
+      });
+      
+
+    });
+    
+    describe('editSalesProductsById that', () => {
+      
+      const { editSalesProductsById } = require('../../services/saleProduct');
+
+      const mockArray = [
+        {
+          product_id: 1,
+          quantity: 10,
+        }
+      ];
+
+      before(() => {
+        stub(saleProductModel, 'update').resolves(true);
+      });
+  
+      after(() => {
+        saleProductModel.update.restore();
+      });
+
+      it('return all the updated items in the key "itemUpdated" in the obj', async () => {
+        const { result: { itemUpdated } } = await editSalesProductsById(
+          { saleArray: mockArray, saleId: 1 },
+        );
+
+        expect(itemUpdated).to.deep.equals(mockArray);
+      });
+
+    });
+
   });
 
 });
-
