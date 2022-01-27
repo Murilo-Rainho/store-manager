@@ -15,6 +15,6 @@ module.exports = async ({ saleArray, saleId }) => {
     httpStatusCode: 200 };
   } catch (error) {
     const CODE_MESSAGE = 'server_error';
-    return { httpStatusCode: 500, code: CODE_MESSAGE, message: 'Something is wrong in the server' };
+    return { httpStatusCode: 500, code: CODE_MESSAGE, message: error.message };
   }
 };

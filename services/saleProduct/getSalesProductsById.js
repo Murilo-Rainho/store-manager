@@ -17,6 +17,6 @@ module.exports = async (saleId) => {
     return { result, httpStatusCode: 200 };
   } catch (error) {
     const CODE_MESSAGE = 'not_found';
-    return { httpStatusCode: 404, code: CODE_MESSAGE, message: 'Sale not found' };
+    return { httpStatusCode: 404, code: CODE_MESSAGE, message: error.message };
   }
 };
