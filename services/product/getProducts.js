@@ -13,6 +13,6 @@ module.exports = async () => {
     return { result: allProducts, httpStatusCode: 200 };
   } catch (error) {
     CODE_MESSAGE = 'server_error';
-    return { httpStatusCode: 500, code: CODE_MESSAGE, message: 'Something is wrong in the server' };
+    return { httpStatusCode: 500, code: CODE_MESSAGE, message: error.message };
   }
 };
