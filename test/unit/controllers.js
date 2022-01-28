@@ -8,6 +8,8 @@ describe('The router', () => {
   const request = {};
   let next = () => {};
 
+  const throwError = new Error('something went wrong');
+
   before(() => {
     response.status = stub().returns(response);
     response.json = stub().returns();
@@ -98,6 +100,23 @@ describe('The router', () => {
 
       });
       
+      describe('when has an error (catch)', () => {
+          
+        before(() => {
+          stub(productServices, 'postProduct').rejects(throwError);
+        });
+  
+        after(() => {
+          productServices.postProduct.restore();
+        });
+
+        it('the "next" function throw the error', async () => {
+          await postProduct(request, response, next);
+
+          expect(next.calledWith(throwError)).to.be.true;
+        });
+
+      });
 
     });
 
@@ -187,6 +206,24 @@ describe('The router', () => {
 
       });
 
+      describe('when has an error (catch)', () => {
+          
+        before(() => {
+          stub(productServices, 'getProducts').rejects(throwError);
+        });
+  
+        after(() => {
+          productServices.getProducts.restore();
+        });
+
+        it('the "next" function throw the error', async () => {
+          await getProducts(request, response, next);
+
+          expect(next.calledWith(throwError)).to.be.true;
+        });
+
+      });
+
     });
 
     describe('getProductById that', () => {
@@ -261,6 +298,24 @@ describe('The router', () => {
           await getProductById(request, response, next);
 
           expect(response.json.calledWith(responseReturn)).to.be.true;
+        });
+
+      });
+
+      describe('when has an error (catch)', () => {
+          
+        before(() => {
+          stub(productServices, 'getProductById').rejects(throwError);
+        });
+  
+        after(() => {
+          productServices.getProductById.restore();
+        });
+
+        it('the "next" function throw the error', async () => {
+          await getProductById(request, response, next);
+
+          expect(next.calledWith(throwError)).to.be.true;
         });
 
       });
@@ -348,6 +403,24 @@ describe('The router', () => {
 
       });
 
+      describe('when has an error (catch)', () => {
+          
+        before(() => {
+          stub(productServices, 'editProductById').rejects(throwError);
+        });
+  
+        after(() => {
+          productServices.editProductById.restore();
+        });
+
+        it('the "next" function throw the error', async () => {
+          await editProductById(request, response, next);
+
+          expect(next.calledWith(throwError)).to.be.true;
+        });
+
+      });
+
     });
 
     describe('deleteProductById that', () => {
@@ -422,6 +495,24 @@ describe('The router', () => {
           await deleteProductById(request, response, next);
 
           expect(response.json.calledWith(responseReturn)).to.be.true;
+        });
+
+      });
+
+      describe('when has an error (catch)', () => {
+          
+        before(() => {
+          stub(productServices, 'deleteProductById').rejects(throwError);
+        });
+  
+        after(() => {
+          productServices.deleteProductById.restore();
+        });
+
+        it('the "next" function throw the error', async () => {
+          await deleteProductById(request, response, next);
+
+          expect(next.calledWith(throwError)).to.be.true;
         });
 
       });
@@ -519,6 +610,23 @@ describe('The router', () => {
 
       });
       
+      describe('when has an error (catch)', () => {
+          
+        before(() => {
+          stub(saleProductServices, 'postSaleProduct').rejects(throwError);
+        });
+  
+        after(() => {
+          saleProductServices.postSaleProduct.restore();
+        });
+
+        it('the "next" function throw the error', async () => {
+          await postSaleProduct(request, response, next);
+
+          expect(next.calledWith(throwError)).to.be.true;
+        });
+
+      });
 
     });
 
@@ -610,7 +718,24 @@ describe('The router', () => {
         });
 
       });
-      
+
+      describe('when has an error (catch)', () => {
+          
+        before(() => {
+          stub(saleProductServices, 'getSalesProducts').rejects(throwError);
+        });
+  
+        after(() => {
+          saleProductServices.getSalesProducts.restore();
+        });
+
+        it('the "next" function throw the error', async () => {
+          await getSalesProducts(request, response, next);
+
+          expect(next.calledWith(throwError)).to.be.true;
+        });
+
+      });
 
     });
 
@@ -691,7 +816,24 @@ describe('The router', () => {
         });
 
       });
-      
+
+      describe('when has an error (catch)', () => {
+          
+        before(() => {
+          stub(saleProductServices, 'getSalesProductsById').rejects(throwError);
+        });
+  
+        after(() => {
+          saleProductServices.getSalesProductsById.restore();
+        });
+
+        it('the "next" function throw the error', async () => {
+          await getSalesProductsById(request, response, next);
+
+          expect(next.calledWith(throwError)).to.be.true;
+        });
+
+      });
 
     });
 
@@ -776,12 +918,27 @@ describe('The router', () => {
         });
 
       });
-      
+
+      describe('when has an error (catch)', () => {
+          
+        before(() => {
+          stub(saleProductServices, 'editSalesProductsById').rejects(throwError);
+        });
+  
+        after(() => {
+          saleProductServices.editSalesProductsById.restore();
+        });
+
+        it('the "next" function throw the error', async () => {
+          await editSalesProductsById(request, response, next);
+
+          expect(next.calledWith(throwError)).to.be.true;
+        });
+
+      });
 
     });
 
   });
-  
-  
 
 });
