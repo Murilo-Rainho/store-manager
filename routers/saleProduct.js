@@ -7,6 +7,7 @@ const {
   getSalesProducts: getSalesProductsController,
   getSalesProductsById: getSalesProductsByIdController,
   editSalesProductsById: editSalesProductsByIdController,
+  deleteSalesProductsById: deleteSalesProductsByIdController,
 } = require('../controllers/saleProduct');
 
 const router = Router();
@@ -18,5 +19,7 @@ router.get('/', getSalesProductsController);
 router.get('/:id', getSalesProductsByIdController);
 
 router.put('/:id', validateProductIdAndQuantity, editSalesProductsByIdController);
+
+router.delete('/:id', deleteSalesProductsByIdController);
 
 module.exports = router;

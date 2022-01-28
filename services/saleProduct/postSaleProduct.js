@@ -1,8 +1,4 @@
-const {
-  Sale,
-  SaleProduct,
-  sequelize,
-} = require('../../models');
+const { Sale, SaleProduct, sequelize } = require('../../models');
 
 let CODE_MESSAGE = 'invalid_data';
 
