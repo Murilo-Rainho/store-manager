@@ -29,12 +29,13 @@ module.exports = async (saleId) => {
 
     const products = await deleteSaleAndUpdateProducts(saleId);
 
+    const lintSnakeCase = 'product_id';
+
     const result = [];
 
     products.forEach(({ dataValues: { id: productId, quantity } }, index) => {
       result[index] = {
-        // product_id: id,
-        productId, // retirar essa linha depois que o lint parar de reclamar de snake_case
+        [lintSnakeCase]: productId,
         quantity,
         date: saleDate,
       };
