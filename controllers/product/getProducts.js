@@ -1,8 +1,8 @@
-const { getProducts: getProductsService } = require('../../services/product');
+const productServices = require('../../services/product');
 
 module.exports = async (_req, res, next) => {
   try {
-    const { code, message, httpStatusCode, result } = await getProductsService();
+    const { code, message, httpStatusCode, result } = await productServices.getProducts();
 
     if (code) return res.status(httpStatusCode).json({ code, message });
 

@@ -1,12 +1,15 @@
-const {
-  editSalesProductsById: editSalesProductsByIdService,
-} = require('../../services/saleProduct');
+const salesProductsServices = require('../../services/saleProduct');
 
 module.exports = async (req, res, next) => {
   try {
     const { id: saleId } = req.params;
     
-    const { code, message, httpStatusCode, result } = await editSalesProductsByIdService(
+    const {
+      code,
+      message,
+      httpStatusCode,
+      result,
+    } = await salesProductsServices.editSalesProductsById(
       { saleId, saleArray: req.body },
     );
   

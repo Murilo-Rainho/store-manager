@@ -1,13 +1,19 @@
-const { deleteProductById: deleteProductByIdService } = require('../../services/product');
+const productServices = require('../../services/product');
 
 module.exports = async (req, res, next) => {
   try {
     const { id: productId } = req.params;
-    const { code, message, httpStatusCode, result } = await deleteProductByIdService(productId);
+
+    const {
+      code,
+      message,
+      httpStatusCode,
+      result,
+    } = await productServices.deleteProductById(productId);
   
     if (code) return res.status(httpStatusCode).json({ code, message });
     
-    res.status(httpStatusCode).json({ ...result });
+    res.status(httpStatusCode).json(result);
   } catch (error) {
     next(error);
   }

@@ -1,9 +1,14 @@
-const { getSalesProductsById: getSalesProductsByIdService } = require('../../services/saleProduct');
+const salesProductsServices = require('../../services/saleProduct');
 
 module.exports = async (req, res, next) => {
   try {
     const { id: saleId } = req.params;
-    const { code, message, httpStatusCode, result } = await getSalesProductsByIdService(saleId);
+    const {
+      code,
+      message,
+      httpStatusCode,
+      result,
+    } = await salesProductsServices.getSalesProductsById(saleId);
   
     if (code) return res.status(httpStatusCode).json({ code, message });
     
