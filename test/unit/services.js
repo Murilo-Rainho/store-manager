@@ -3,9 +3,9 @@ const { expect } = require('chai');
 
 describe('The router', () => {
 
-  describe('"product" has the service', () => {
+  const { Product: productModel, Sale: saleModel, SaleProduct: saleProductModel, sequelize } = require('../../models');
 
-    const { Product: productModel } = require('../../models');
+  describe('"product" has the service', () => {
     
     describe('postProduct that', () => {
 
@@ -226,8 +226,6 @@ describe('The router', () => {
 
   describe('"saleProduct" has the service', () => {
 
-    const { Sale: saleModel, SaleProduct: saleProductModel, sequelize } = require('../../models');
-
     describe('postSaleProduct that', () => {
 
       const { postSaleProduct } = require('../../services/saleProduct');
@@ -332,16 +330,20 @@ describe('The router', () => {
         },
       ];
 
-      it('return all sales_products', async () => {
+      before(() => {
         stub(saleProductModel, 'findAll').resolves(saleProductModelMockArray);
         stub(saleModel, 'findByPk').resolves(saleModelMockObj);
+      });
+  
+      after(() => {
+        saleProductModel.findAll.restore();
+        saleModel.findByPk.restore();
+      });
 
+      it('return all sales_products', async () => {
         const { result } = await getSalesProducts();
 
         expect(result).to.deep.equals(resultMockArray);
-
-        saleProductModel.findAll.restore();
-        saleModel.findByPk.restore();
       });
 
     });
@@ -445,6 +447,75 @@ describe('The router', () => {
         );
 
         expect(itemUpdated).to.deep.equals(mockArray);
+      });
+
+    });
+
+    describe('deleteSalesProductsById that', () => {
+      
+      const { deleteSalesProductsById } = require('../../services/saleProduct');
+
+      const mockArrayResult = [
+        {
+          product_id: 1,
+          quantity: 15,
+          date: new Date('2022-01-28T21:30:37.000Z')
+        },
+        {
+          product_id: 2,
+          quantity: 30,
+          date: new Date('2022-01-28T21:30:37.000Z')
+        }
+      ];
+
+      const saleMock = {
+        dataValues: { date: new Date('2022-01-28T21:30:37.000Z') },
+      };
+
+      const allSalesProductsMock = [
+        {
+          product_id: 1,
+          quantity: 15,
+        },
+        {
+          product_id: 2,
+          quantity: 30,
+        },
+      ];
+
+      const allProductsMock = [
+        { dataValues: {
+          id: 1,
+          quantity: 15,
+        } },
+        { dataValues: {
+          id: 2,
+          quantity: 30,
+        } },
+      ];
+
+      before(() => {
+        stub(saleModel, 'findByPk').resolves(saleMock);
+        stub(sequelize, 'transaction').resolves({ commit: () => {} });
+        stub(saleProductModel, 'findAll').resolves(allSalesProductsMock);
+        stub(productModel, 'update').resolves(Promise.resolve(true));
+        stub(productModel, 'findAll').resolves(Promise.resolve(allProductsMock));
+        stub(saleModel, 'destroy').resolves(true);
+      });
+  
+      after(() => {
+        saleModel.findByPk.restore();
+        sequelize.transaction.restore();
+        saleProductModel.findAll.restore();
+        productModel.update.restore();
+        productModel.findAll.restore();
+        saleModel.destroy.restore();
+      });
+
+      it('return all the products that have had your quantity increased when the sale was deleted', async () => {
+        const { result } = await deleteSalesProductsById(2);
+
+        expect(result).to.deep.equals(mockArrayResult);
       });
 
     });

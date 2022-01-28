@@ -873,7 +873,7 @@ describe('The router', () => {
         it('return "200" as http status code', async () => {
           await editSalesProductsById(request, response, next);
 
-          expect(response.status.calledWith(201)).to.be.true;
+          expect(response.status.calledWith(200)).to.be.true;
         });
         
         it('return the sales_products object', async () => {
@@ -931,6 +931,109 @@ describe('The router', () => {
 
         it('the "next" function throw the error', async () => {
           await editSalesProductsById(request, response, next);
+
+          expect(next.calledWith(throwError)).to.be.true;
+        });
+
+      });
+
+    });
+
+    describe('deleteSalesProductsById that', () => {
+
+      const { deleteSalesProductsById } = saleProductControllers;
+
+      request.params = { id: 2 };
+      
+      describe('when was a success', () => {
+
+        const mockResultSuccess = [
+          {
+            'product_id': 1,
+            'quantity': 15,
+            'date': new Date('2022-01-28T21:30:37.000Z')
+          },
+          {
+            'product_id': 2,
+            'quantity': 30,
+            'date': new Date('2022-01-28T21:30:37.000Z')
+          }
+        ];
+        
+        const serviceResultSuccess = {
+          httpStatusCode: 200,
+          result: mockResultSuccess,
+        };
+  
+        before(() => {
+          stub(saleProductServices, 'deleteSalesProductsById').resolves(serviceResultSuccess);
+        });
+  
+        after(() => {
+          saleProductServices.deleteSalesProductsById.restore();
+        });
+
+        it('return "200" as http status code', async () => {
+          await deleteSalesProductsById(request, response, next);
+
+          expect(response.status.calledWith(200)).to.be.true;
+        });
+        
+        it('return the sales_products object', async () => {
+          await deleteSalesProductsById(request, response, next);
+
+          expect(response.json.calledWith(serviceResultSuccess.result)).to.be.true;
+        });
+
+      });
+
+      describe('when was a fail', () => {
+        
+        const serviceResultFail = {
+          code: 'error',
+          message: 'Has a error message',
+          httpStatusCode: 400,
+        };
+
+        const responseReturn = {
+          message: serviceResultFail.message,
+          code: serviceResultFail.code,
+        }
+
+        before(() => {
+          stub(saleProductServices, 'deleteSalesProductsById').resolves(serviceResultFail);
+        });
+  
+        after(() => {
+          saleProductServices.deleteSalesProductsById.restore();
+        });
+        
+        it('return a correct http status code', async () => {
+          await deleteSalesProductsById(request, response, next);
+
+          expect(response.status.calledWith(serviceResultFail.httpStatusCode)).to.be.true;
+        });
+
+        it('return an error message and a code error', async () => {
+          await deleteSalesProductsById(request, response, next);
+
+          expect(response.json.calledWith(responseReturn)).to.be.true;
+        });
+
+      });
+
+      describe('when has an error (catch)', () => {
+          
+        before(() => {
+          stub(saleProductServices, 'deleteSalesProductsById').rejects(throwError);
+        });
+  
+        after(() => {
+          saleProductServices.deleteSalesProductsById.restore();
+        });
+
+        it('the "next" function throw the error', async () => {
+          await deleteSalesProductsById(request, response, next);
 
           expect(next.calledWith(throwError)).to.be.true;
         });
