@@ -31,9 +31,10 @@ module.exports = async (saleId) => {
 
     const result = [];
 
-    products.forEach(({ dataValues: { id, quantity } }, index) => {
+    products.forEach(({ dataValues: { id: productId, quantity } }, index) => {
       result[index] = {
-        product_id: id,
+        // product_id: id,
+        productId, // retirar essa linha depois que o lint parar de reclamar de snake_case
         quantity,
         date: saleDate,
       };

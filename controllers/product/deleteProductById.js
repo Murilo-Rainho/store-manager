@@ -2,7 +2,9 @@ const productServices = require('../../services/product');
 
 module.exports = async (req, res, next) => {
   try {
-    const { id: productId } = req.params;
+    const {
+      id: productId,
+    } = req.params;
 
     const {
       code,
@@ -11,8 +13,10 @@ module.exports = async (req, res, next) => {
       result,
     } = await productServices.deleteProductById(productId);
   
-    if (code) return res.status(httpStatusCode).json({ code, message });
-    
+    if (code) {
+      return res.status(httpStatusCode).json({ code, message });
+    }
+
     res.status(httpStatusCode).json(result);
   } catch (error) {
     next(error);
