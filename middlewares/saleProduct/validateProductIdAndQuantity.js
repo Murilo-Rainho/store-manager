@@ -33,7 +33,7 @@ module.exports = async (req, res, next) => {
 
     const err = { code: CODE_MESSAGE, message: error.message };
 
-    return res.status(httpStatusCode).json({ ...err });
+    return res.status(httpStatusCode).json(err);
   }
 
   next();

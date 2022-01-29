@@ -1,6 +1,8 @@
 const { Router } = require('express');
 
-const { validateProductIdAndQuantity } = require('../middlewares/saleProduct');
+const {
+  validateProductIdAndQuantity,
+} = require('../middlewares/saleProduct');
 
 const {
   postSaleProduct: postSaleProductController,
