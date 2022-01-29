@@ -59,17 +59,6 @@ describe('The router', () => {
         await validateNameAndQuantity(request, response, next);
 
         expect(response.status.calledWith(400)).to.be.equal(true);
-
-        // request.body = {
-        //   name: 'orange',
-        //   quantity: 10,
-        // };
-
-        // await validateNameAndQuantity(request, response, next);
-
-        // console.log(next());
-
-        // expect(next).to.be.equal(true);
       });
 
     });
@@ -107,6 +96,16 @@ describe('The router', () => {
         const { message } = await getProducts();
 
         expect(message).to.be.equal('Has no product registered');
+
+        productModel.findAll.restore();
+      });
+
+      it('returns a error message if has a server error', async () => {
+        stub(productModel, 'findAll').rejects();
+
+        const responseService = await getProducts();
+
+        expect(responseService).to.have.own.property('message')
 
         productModel.findAll.restore();
       });
@@ -248,17 +247,36 @@ describe('The router', () => {
         },
         {
           product_id: 2,
+          quantity: 2
+        },
+        {
+          product_id: 3,
+          quantity: 7
+        },
+        {
+          product_id: 4,
           quantity: 5
         },
       ];
 
-      const failMockArray = [
+      const failMockArrayOne = [
         {
           quantity: 1,
         },
         {
           product_id: 2,
           quantity: 20,
+        },
+      ];
+
+      const failMockArrayTwo = [
+        {
+          product_id: 1,
+          quantity: 1,
+        },
+        {
+          product_id: 2,
+          quantity: 100,
         },
       ];
 
@@ -271,35 +289,71 @@ describe('The router', () => {
         { dataValues: {
           id: 2,
           name: 'Traje de encolhimento',
+          quantity: 10
+        } },
+        { dataValues: {
+          id: 3,
+          name: 'Pedras do infinito',
+          quantity: 30
+        } },
+        { dataValues: {
+          id: 4,
+          name: 'Armadura de ferro',
           quantity: 20
         } },
       ];
 
-      it('return an array of objects in the key "itemsSold" when bulk insert are a success', async () => {
+      before(() => {
         stub(sequelize, 'transaction').resolves({
           commit: () => {},
           rollback: () => {}
         });
         stub(sequelize, 'literal').resolves(true);
-        stub(saleModel, 'create').resolves({ id: 2 });
         stub(saleProductModel, 'create').resolves();
         stub(productModel, 'findAll').resolves(productMockArray);
+      });
+  
+      after(() => {
+        saleProductModel.create.restore();
+        productModel.findAll.restore();
+        sequelize.transaction.restore();
+        sequelize.literal.restore();
+      });
+
+      it('return an array of objects in the key "itemsSold" when bulk insert are a success', async () => {
+        stub(saleModel, 'create').resolves({ id: 2 });
 
         const { result: { itemsSold } } = await postSaleProduct(successMockArray);
 
         expect(itemsSold).to.deep.equals(successMockArray);
 
         saleModel.create.restore();
-        saleProductModel.create.restore();
-        productModel.findAll.restore();
-        sequelize.transaction.restore();
-        sequelize.literal.restore();
+      });
+
+      it('return an error of "many_sales"', async () => {
+        stub(saleModel, 'create').resolves({ id: 2 });
+
+        const responseService = await postSaleProduct(failMockArrayTwo);
+
+        expect(responseService).to.have.own.property('message');
+
+        saleModel.create.restore();
+      });
+
+      it('return an error server', async () => {
+        stub(saleModel, 'create').rejects(new Error('Something went wrong'));
+
+        const responseService = await postSaleProduct(failMockArrayOne);
+
+        expect(responseService).to.have.own.property('message');
+
+        saleModel.create.restore();
       });
       
       it('validate the array of salesObj, that must have, which one, the keys "product_id" and "quantity"', () => {
         const response = {};
         const request = {};
-        request.body = failMockArray;
+        request.body = failMockArrayOne;
         let next = () => {};
 
         response.status = stub().returns(response);
@@ -361,19 +415,31 @@ describe('The router', () => {
       ];
 
       before(() => {
-        stub(saleProductModel, 'findAll').resolves(saleProductModelMockArray);
         stub(saleModel, 'findByPk').resolves(saleModelMockObj);
       });
   
       after(() => {
-        saleProductModel.findAll.restore();
         saleModel.findByPk.restore();
       });
 
       it('return all sales_products', async () => {
+        stub(saleProductModel, 'findAll').resolves(saleProductModelMockArray);
+
         const { result } = await getSalesProducts();
 
         expect(result).to.deep.equals(resultMockArray);
+
+        saleProductModel.findAll.restore();
+      });
+
+      it('return an error server', async () => {
+        stub(saleProductModel, 'findAll').resolves();
+
+        const responseService = await getSalesProducts();
+
+        expect(responseService).to.have.own.property('message');
+
+        saleProductModel.findAll.restore();
       });
 
     });
@@ -463,20 +529,28 @@ describe('The router', () => {
         }
       ];
 
-      before(() => {
-        stub(saleProductModel, 'update').resolves(true);
-      });
-  
-      after(() => {
-        saleProductModel.update.restore();
-      });
-
       it('return all the updated items in the key "itemUpdated" in the obj', async () => {
-        const { result: { itemUpdated } } = await editSalesProductsById(
+        stub(saleProductModel, 'update').resolves(mockArray);
+
+        const responseService = await editSalesProductsById(
           { saleArray: mockArray, saleId: 1 },
         );
 
-        expect(itemUpdated).to.deep.equals(mockArray);
+        expect(responseService.result.itemUpdated).to.deep.equals(mockArray);
+
+        saleProductModel.update.restore();
+      });
+
+      it('return an error server', async () => {
+        stub(saleProductModel, 'update').rejects(new Error('Something went wrong'));
+
+        const responseService = await editSalesProductsById(
+          { saleArray: mockArray, saleId: 1 },
+        );
+
+        expect(responseService).to.have.own.property('message');
+
+        saleProductModel.update.restore();
       });
 
     });
@@ -525,28 +599,58 @@ describe('The router', () => {
       ];
 
       before(() => {
-        stub(saleModel, 'findByPk').resolves(saleMock);
-        stub(sequelize, 'transaction').resolves({ commit: () => {} });
-        stub(saleProductModel, 'findAll').resolves(allSalesProductsMock);
+        stub(sequelize, 'transaction').resolves({
+          commit: () => {},
+          rollback: () => {},
+        });
+        stub(sequelize, 'literal').returns(true)
         stub(productModel, 'update').resolves(Promise.resolve(true));
         stub(productModel, 'findAll').resolves(Promise.resolve(allProductsMock));
         stub(saleModel, 'destroy').resolves(true);
       });
   
       after(() => {
-        saleModel.findByPk.restore();
         sequelize.transaction.restore();
-        saleProductModel.findAll.restore();
         productModel.update.restore();
         productModel.findAll.restore();
         saleModel.destroy.restore();
+        sequelize.literal.restore();
       });
 
       it('return all the products that have had your quantity increased when the sale was deleted', async () => {
+        stub(saleProductModel, 'findAll').resolves(allSalesProductsMock);
+        stub(saleModel, 'findByPk').resolves(saleMock);
+
         const { result } = await deleteSalesProductsById(2);
 
         expect(result).to.deep.equals(mockArrayResult);
+
+        saleProductModel.findAll.restore();
+        saleModel.findByPk.restore();
       });
+
+      it('return a message when the server broken in the first trycatch', async () => {
+        stub(saleModel, 'findByPk').resolves();
+        
+        const { message: catchOneMessage } = await deleteSalesProductsById(2);
+        
+        expect(catchOneMessage).to.deep.equals('Sale not found');
+        
+        saleModel.findByPk.restore();
+      });
+
+      it('return a message when the server broken in the second trycatch', async () => {
+        stub(saleModel, 'findByPk').resolves(saleMock);
+        stub(saleProductModel, 'findAll').resolves();
+        
+        const { message: catchTwoMessage } = await deleteSalesProductsById(2);
+        
+        expect(catchTwoMessage).to.deep.equals('Something went wrong');
+        
+        saleModel.findByPk.restore();
+        saleProductModel.findAll.restore();
+      });
+      
 
     });
 

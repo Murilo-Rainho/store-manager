@@ -2,13 +2,13 @@ const { Sale, Product, SaleProduct, sequelize } = require('../../models');
 
 const orderProductsAndSales = (allProducts, allSales) => {
   const orderedProducts = allProducts
-    .sort(({ dataValues: { id: idA } }, { dataValues: { id: idB } }) => {
-      if (idA > idB) return 1;
-      if (idB > idA) return -1;
+    .sort(({ dataValues: { quantity: quantityA } }, { dataValues: { quantity: quantityB } }) => {
+      if (quantityA > quantityB) return 1;
+      if (quantityB > quantityA) return -1;
       return 0;
     });
 
-  const orderedSales = allSales.sort(({ product_id: a }, { product_id: b }) => {
+  const orderedSales = allSales.sort(({ quantity: a }, { quantity: b }) => {
     if (a > b) return 1;
     if (b > a) return -1;
     return 0;
@@ -17,10 +17,10 @@ const orderProductsAndSales = (allProducts, allSales) => {
   return { orderedProducts, orderedSales };
 };
 
-const validateProductsQuantities = async (productId, salesInfosArray) => {
+const validateProductsQuantities = async (productId, salesArray) => {
   const allProducts = await Product.findAll({ where: { id: productId } });
 
-   const { orderedProducts, orderedSales } = orderProductsAndSales(allProducts, salesInfosArray);
+   const { orderedProducts, orderedSales } = orderProductsAndSales(allProducts, salesArray);
 
   const result = {};
 

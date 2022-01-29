@@ -23,7 +23,7 @@ const deleteSaleAndUpdateProducts = async (saleId) => {
   
     return { products: updatedProducts };
   } catch (error) {
-    await transaction.rollBack();
+    await transaction.rollback();
     return { message: 'Something went wrong', code: 'server_error' };
   }
 };

@@ -11,7 +11,7 @@ module.exports = async ({ name, quantity }) => {
     }
   
     const { dataValues: result } = await Product.create({ name, quantity });
-  
+
     return { result, httpStatusCode: 201 };
   } catch (error) {
     CODE_MESSAGE = 'server_error';

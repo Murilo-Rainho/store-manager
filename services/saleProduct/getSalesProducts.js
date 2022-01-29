@@ -22,7 +22,6 @@ module.exports = async () => {
 
     return { result, httpStatusCode: 200 };
   } catch (error) {
-    console.log(error);
     CODE_MESSAGE = 'server_error';
     return { httpStatusCode: 500, code: CODE_MESSAGE, message: error.message };
   }
