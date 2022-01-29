@@ -34,20 +34,31 @@ const validateProductsQuantities = async (productId, salesInfosArray) => {
   return result;
 };
 
-module.exports = async (salesInfosArray) => {
-  try {
-    const transaction = await sequelize.transaction();
+const createSales = async (transaction, salesArray, saleId) => {
+  const productsIds = [];
 
+  await Promise.all(salesArray.map(({ product_id: productId, quantity }, index) => {
+    productsIds[index] = productId;
+    return [
+      SaleProduct.create({ saleId, productId, quantity }, { transaction }),
+      Product.update({ quantity: sequelize.literal(`quantity - ${quantity}`) },
+      { where: { id: productId } },
+      { transaction }),
+    ];
+  }));
+
+  return productsIds;
+};
+
+module.exports = async (salesArray) => {
+  const transaction = await sequelize.transaction();
+
+  try {
     const { id: saleId } = await Sale.create({}, { transaction });
 
-    const productsIds = [];
-  
-    await Promise.all(salesInfosArray.map(({ product_id: productId, quantity }, index) => {
-      productsIds[index] = productId;
-      return SaleProduct.create({ saleId, productId, quantity }, { transaction });
-    }));
+    const productsIds = await createSales(transaction, salesArray, saleId);
 
-    const { message, code } = await validateProductsQuantities(productsIds, salesInfosArray);
+    const { message, code } = await validateProductsQuantities(productsIds, salesArray);
 
     if (message) {
       await transaction.rollback();
@@ -56,8 +67,9 @@ module.exports = async (salesInfosArray) => {
 
     await transaction.commit();
   
-    return { result: { id: saleId, itemsSold: salesInfosArray }, httpStatusCode: 201 };
+    return { result: { id: saleId, itemsSold: salesArray }, httpStatusCode: 201 };
   } catch (error) {
+    await transaction.rollback();
     return { httpStatusCode: 500, code: 'server_error', message: error.message };
   }
 };

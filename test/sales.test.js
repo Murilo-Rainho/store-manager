@@ -861,7 +861,7 @@ describe('Sales', () => {
     });
   });
 
-  describe.only('12 - Valide a quantidade de produtos', () => {
+  describe('12 - Valide a quantidade de produtos', () => {
     it('Será validado que o estoque do produto nunca fique com a quantidade menor que zero', async () => {
       let result;
       let responseProductId;

@@ -177,15 +177,15 @@ describe('The router', () => {
         productModel.findByPk.restore();
       });
       
-      // it('return a error message when has no product with this productId', async () => {
-      //   stub(productModel, 'findByPk').rejects();
+      it('return a error message when has no product with this productId', async () => {
+        stub(productModel, 'findByPk').resolves();
 
-      //   const { message } = await deleteProductById(mockId);
+        const { message } = await deleteProductById(mockId);
 
-      //   expect(message).to.be.equal('Product not found');
+        expect(message).to.be.equal('Product not found');
 
-      //   productModel.findByPk.restore();
-      // });
+        productModel.findByPk.restore();
+      });
 
     });
 
@@ -220,6 +220,16 @@ describe('The router', () => {
         productModel.update.restore();
       });
 
+      it('return an error message when has an internal error', async () => {
+        stub(productModel, 'update').resolves();
+
+        const serviceResponse = await editProductById({ ...mockObj, productId: mockId });
+
+        expect(serviceResponse).to.have.own.property('message')
+
+        productModel.update.restore();
+      });
+
     });
 
   });
@@ -231,7 +241,7 @@ describe('The router', () => {
       const { postSaleProduct } = require('../../services/saleProduct');
       const { validateProductIdAndQuantity } = require('../../middlewares/saleProduct');
 
-      const mockArray = [
+      const successMockArray = [
         {
           product_id: 1,
           quantity: 2
@@ -240,7 +250,7 @@ describe('The router', () => {
           product_id: 2,
           quantity: 5
         },
-      ]	;
+      ];
 
       const failMockArray = [
         {
@@ -252,18 +262,38 @@ describe('The router', () => {
         },
       ];
 
+      const productMockArray = [
+        { dataValues: {
+          id: 1,
+          name: 'Martelo de Thor',
+          quantity: 10
+        } },
+        { dataValues: {
+          id: 2,
+          name: 'Traje de encolhimento',
+          quantity: 20
+        } },
+      ];
+
       it('return an array of objects in the key "itemsSold" when bulk insert are a success', async () => {
-        stub(sequelize, 'transaction').resolves({ commit: () => {} });
+        stub(sequelize, 'transaction').resolves({
+          commit: () => {},
+          rollback: () => {}
+        });
+        stub(sequelize, 'literal').resolves(true);
         stub(saleModel, 'create').resolves({ id: 2 });
         stub(saleProductModel, 'create').resolves();
+        stub(productModel, 'findAll').resolves(productMockArray);
 
-        const { result: { itemsSold } } = await postSaleProduct(mockArray);
+        const { result: { itemsSold } } = await postSaleProduct(successMockArray);
 
-        expect(itemsSold).to.deep.equals(mockArray);
+        expect(itemsSold).to.deep.equals(successMockArray);
 
         saleModel.create.restore();
         saleProductModel.create.restore();
+        productModel.findAll.restore();
         sequelize.transaction.restore();
+        sequelize.literal.restore();
       });
       
       it('validate the array of salesObj, that must have, which one, the keys "product_id" and "quantity"', () => {
