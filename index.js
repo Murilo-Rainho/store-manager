@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 
 const app = express();
 
+const PORT = process.env.PORT || 3010;
+
 app.use(bodyParser.json());
 
 const { productRouter, saleProductRouter } = require('./routers');
@@ -19,5 +21,5 @@ app.use('/products', productRouter);
 app.use('/sales', saleProductRouter);
 
 app.listen(process.env.PORT, () => {
-  console.log(`Escutando na porta ${process.env.PORT}`);
+  console.log(`Escutando na porta ${PORT}`);
 });
